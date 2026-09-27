@@ -8,20 +8,20 @@
 - Структура repo, docs, ADR, CLAUDE.md, agent definitions, git branch.
 - **Done:** документы в `docs/`, `main` + рабочая ветка.
 
-## M1 — Data model + Library tools ◐
+## M1 — Data model + Library tools ☑
 - JSON Schema: arrangement, index.
 - `tools/library`: `render` (JSON → SVG + mirror), `validate`, `build` (→ `app/public/library/`).
 - Synthetic fixtures (3–5 arrangements) для разработки.
 - Unit tests: детерминизм renderer, корректность mirror, validator ловит ошибки.
 - **Done:** `npm run validate && npm test` зелёные; `npm run build:library` создаёт index + SVG.
 
-## M2 — Viewer prototype ◐
+## M2 — Viewer prototype ☑
 - Vite + React + TS в `app/`, hash routing.
 - Home: Letter grid → Number grid из `index.json`.
 - Viewer: inline SVG, pinch/pan/double-tap/wheel zoom через viewBox, fit/reset, back, Mirror + индикатор, `viewCaption`.
 - **Done:** на fixtures всё работает в desktop Chrome и Android Chrome (DevTools device mode).
 
-## M3 — PWA + offline + wake lock ◐
+## M3 — PWA + offline + wake lock ◐ (build verified, on-device offline check pending)
 - manifest, icons, `vite-plugin-pwa` precache всей библиотеки, update prompt.
 - Wake Lock hook с re-acquire.
 - **Done:** Lighthouse installable; airplane mode → всё работает; экран не гаснет в Viewer.
