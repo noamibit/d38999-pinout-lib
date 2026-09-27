@@ -116,6 +116,17 @@ async function reject(familyDir, id) {
   return { ok: true };
 }
 
+// Path segments end up in path.join() for reads and writes (approve/reject).
+// GET routes take these from the URL, which the WHATWG URL parser normalizes
+// against `..` segments -- but POST bodies (approve/reject) are raw JSON with no
+// such protection, so validate everywhere rather than relying on that.
+const FAMILY_DIR_RE = /^[a-z0-9-]{1,40}$/;
+const ID_RE = /^[A-Za-z0-9]{1,20}$/;
+
+function isSafeSegment(value, re) {
+  return typeof value === 'string' && re.test(value);
+}
+
 function send(res, status, body, headers = {}) {
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', ...headers });
   res.end(JSON.stringify(body));
@@ -147,6 +158,9 @@ const server = http.createServer(async (req, res) => {
     }
     if (url.pathname.startsWith('/api/svg/') && req.method === 'GET') {
       const [, , , familyDir, id] = url.pathname.split('/');
+      if (!isSafeSegment(familyDir, FAMILY_DIR_RE) || !isSafeSegment(id, ID_RE)) {
+        return send(res, 400, { error: 'invalid familyDir or id' });
+      }
       const { data } = await readArrangement(familyDir, id);
       res.writeHead(200, { 'Content-Type': 'image/svg+xml' });
       res.end(renderSvg(data));
@@ -154,6 +168,9 @@ const server = http.createServer(async (req, res) => {
     }
     if (url.pathname.startsWith('/api/source/') && req.method === 'GET') {
       const [, , , familyDir, id] = url.pathname.split('/');
+      if (!isSafeSegment(familyDir, FAMILY_DIR_RE) || !isSafeSegment(id, ID_RE)) {
+        return send(res, 400, { error: 'invalid familyDir or id' });
+      }
       const p = path.join(STAGING, familyDir, `${id}.source.png`);
       if (!(await exists(p))) return send(res, 404, { error: 'no source image' });
       res.writeHead(200, { 'Content-Type': 'image/png' });
@@ -162,10 +179,16 @@ const server = http.createServer(async (req, res) => {
     }
     if (url.pathname === '/api/approve' && req.method === 'POST') {
       const { familyDir, id } = await readBody(req);
+      if (!isSafeSegment(familyDir, FAMILY_DIR_RE) || !isSafeSegment(id, ID_RE)) {
+        return send(res, 400, { error: 'invalid familyDir or id' });
+      }
       return send(res, 200, await approve(familyDir, id));
     }
     if (url.pathname === '/api/reject' && req.method === 'POST') {
       const { familyDir, id } = await readBody(req);
+      if (!isSafeSegment(familyDir, FAMILY_DIR_RE) || !isSafeSegment(id, ID_RE)) {
+        return send(res, 400, { error: 'invalid familyDir or id' });
+      }
       return send(res, 200, await reject(familyDir, id));
     }
     if (url.pathname.startsWith('/api/')) return send(res, 404, { error: 'not found' });
@@ -176,6 +199,8 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
+// Bind to loopback only -- this is a single-admin local tool with unauthenticated
+// approve/reject/file-read endpoints; it must not be reachable from the LAN.
+server.listen(PORT, '127.0.0.1', () => {
   console.log(`QA tool: http://localhost:${PORT}/  (staging: ${path.relative(REPO_ROOT, STAGING)})`);
 });
