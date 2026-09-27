@@ -1,0 +1,248 @@
+{
+  "schemaVersion": 1,
+  "id": "A99",
+  "family": "D38999",
+  "prefix": "A",
+  "number": "99",
+  "title": "A99",
+  "viewCaption": "SYNTHETIC TEST DATA — not a real arrangement",
+  "expectedContacts": 13,
+  "canvas": {
+    "width": 800,
+    "height": 800
+  },
+  "insert": {
+    "cx": 400,
+    "cy": 400,
+    "r": 360
+  },
+  "contacts": [
+    {
+      "label": "A",
+      "cx": 400,
+      "cy": 400,
+      "r": 20,
+      "style": "hollow",
+      "text": {
+        "x": 418,
+        "y": 372.8,
+        "size": 18,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "B",
+      "cx": 400,
+      "cy": 280,
+      "r": 20,
+      "style": "hollow",
+      "text": {
+        "x": 418,
+        "y": 252.8,
+        "size": 18,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "C",
+      "cx": 503.9,
+      "cy": 340,
+      "r": 20,
+      "style": "hollow",
+      "text": {
+        "x": 521.9,
+        "y": 312.8,
+        "size": 18,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "D",
+      "cx": 503.9,
+      "cy": 460,
+      "r": 20,
+      "style": "hollow",
+      "text": {
+        "x": 521.9,
+        "y": 432.8,
+        "size": 18,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "E",
+      "cx": 400,
+      "cy": 520,
+      "r": 20,
+      "style": "hollow",
+      "text": {
+        "x": 418,
+        "y": 492.8,
+        "size": 18,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "F",
+      "cx": 296.1,
+      "cy": 460,
+      "r": 20,
+      "style": "hollow",
+      "text": {
+        "x": 314.1,
+        "y": 432.8,
+        "size": 18,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "G",
+      "cx": 296.1,
+      "cy": 340,
+      "r": 20,
+      "style": "hollow",
+      "text": {
+        "x": 314.1,
+        "y": 312.8,
+        "size": 18,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "H",
+      "cx": 520,
+      "cy": 192.2,
+      "r": 20,
+      "style": "hollow",
+      "text": {
+        "x": 538,
+        "y": 165,
+        "size": 18,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "J",
+      "cx": 640,
+      "cy": 400,
+      "r": 20,
+      "style": "hollow",
+      "text": {
+        "x": 658,
+        "y": 372.8,
+        "size": 18,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "K",
+      "cx": 520,
+      "cy": 607.8,
+      "r": 20,
+      "style": "hollow",
+      "text": {
+        "x": 538,
+        "y": 580.6,
+        "size": 18,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "L",
+      "cx": 280,
+      "cy": 607.8,
+      "r": 20,
+      "style": "hollow",
+      "text": {
+        "x": 298,
+        "y": 580.6,
+        "size": 18,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "M",
+      "cx": 160,
+      "cy": 400,
+      "r": 20,
+      "style": "hollow",
+      "text": {
+        "x": 178,
+        "y": 372.8,
+        "size": 18,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "N",
+      "cx": 280,
+      "cy": 192.2,
+      "r": 20,
+      "style": "hollow",
+      "text": {
+        "x": 298,
+        "y": 165,
+        "size": 18,
+        "anchor": "start",
+        "rotate": 0
+      }
+    }
+  ],
+  "shapes": [
+    {
+      "type": "path",
+      "d": "M 378 44 L 422 44 L 400 80 Z",
+      "fill": true
+    },
+    {
+      "type": "circle",
+      "cx": 730,
+      "cy": 460,
+      "r": 8,
+      "fill": true
+    }
+  ],
+  "annotations": [
+    {
+      "text": "SYNTHETIC",
+      "x": 20,
+      "y": 30,
+      "size": 22,
+      "anchor": "start",
+      "rotate": 0
+    }
+  ],
+  "source": {
+    "file": null,
+    "sha256": null,
+    "ref": "synthetic"
+  },
+  "qa": {
+    "confidence": null,
+    "warnings": []
+  },
+  "status": "approved",
+  "revision": 1,
+  "series": null,
+  "manufacturer": null,
+  "partNumbers": [],
+  "shell": null,
+  "notes": null,
+  "tags": [
+    "synthetic"
+  ],
+  "createdAt": "2026-09-27",
+  "updatedAt": "2026-09-27"
+}

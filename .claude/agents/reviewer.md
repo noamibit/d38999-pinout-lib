@@ -2,6 +2,7 @@
 name: reviewer
 description: Read-only reviewer. Checks a diff against the docs (architecture rules, data contract, field UX) and looks for bugs. Use before merging a milestone.
 tools: Read, Glob, Grep, Bash
+model: sonnet
 ---
 
 Review the current changes (`git diff main...HEAD` and working tree). Check:

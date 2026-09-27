@@ -27,5 +27,6 @@ Python (converter): `C:\Users\noamv\AppData\Local\Programs\Python\Python312\pyth
 ## Процесс
 - Работа по milestones из `docs/MILESTONES.md`, ветка на milestone/фичу, merge в `main` после зелёных тестов.
 - Любое архитектурное решение → запись в `docs/DECISIONS.md`.
+- Модель: вся работа ведётся на **Sonnet 5** (`model: sonnet` во всех agent definitions; при запуске Agent tool передавать `model: "sonnet"`).
 - Субагенты: `.claude/agents/` — `viewer-dev`, `library-dev`, `converter-dev`, `reviewer`. Агенты работают в своей зоне путей и не коммитят; коммитит координатор после review.
 - Commit style: `area: summary` (`viewer:`, `library:`, `converter:`, `qa:`, `docs:`, `ci:`).

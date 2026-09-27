@@ -1,0 +1,332 @@
+{
+  "schemaVersion": 1,
+  "id": "B97",
+  "family": "D38999",
+  "prefix": "B",
+  "number": "97",
+  "title": "B97",
+  "viewCaption": "SYNTHETIC TEST DATA — not a real arrangement",
+  "expectedContacts": 19,
+  "canvas": {
+    "width": 800,
+    "height": 800
+  },
+  "insert": {
+    "cx": 400,
+    "cy": 400,
+    "r": 360
+  },
+  "contacts": [
+    {
+      "label": "A",
+      "cx": 400,
+      "cy": 400,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 414.4,
+        "y": 378.2,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "B",
+      "cx": 400,
+      "cy": 310,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 414.4,
+        "y": 288.2,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "C",
+      "cx": 477.9,
+      "cy": 355,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 492.3,
+        "y": 333.2,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "D",
+      "cx": 477.9,
+      "cy": 445,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 492.3,
+        "y": 423.2,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "E",
+      "cx": 400,
+      "cy": 490,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 414.4,
+        "y": 468.2,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "F",
+      "cx": 322.1,
+      "cy": 445,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 336.5,
+        "y": 423.2,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "G",
+      "cx": 322.1,
+      "cy": 355,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 336.5,
+        "y": 333.2,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "H",
+      "cx": 400,
+      "cy": 210,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 414.4,
+        "y": 188.2,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "J",
+      "cx": 495,
+      "cy": 235.5,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 509.4,
+        "y": 213.7,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "K",
+      "cx": 564.5,
+      "cy": 305,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 578.9,
+        "y": 283.2,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "L",
+      "cx": 590,
+      "cy": 400,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 604.4,
+        "y": 378.2,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "M",
+      "cx": 564.5,
+      "cy": 495,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 578.9,
+        "y": 473.2,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "N",
+      "cx": 495,
+      "cy": 564.5,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 509.4,
+        "y": 542.8,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "P",
+      "cx": 400,
+      "cy": 590,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 414.4,
+        "y": 568.2,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "R",
+      "cx": 305,
+      "cy": 564.5,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 319.4,
+        "y": 542.8,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "S",
+      "cx": 235.5,
+      "cy": 495,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 249.9,
+        "y": 473.2,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "T",
+      "cx": 210,
+      "cy": 400,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 224.4,
+        "y": 378.2,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "U",
+      "cx": 235.5,
+      "cy": 305,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 249.9,
+        "y": 283.2,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "V",
+      "cx": 305,
+      "cy": 235.5,
+      "r": 16,
+      "style": "hollow",
+      "text": {
+        "x": 319.4,
+        "y": 213.7,
+        "size": 14.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    }
+  ],
+  "shapes": [
+    {
+      "type": "path",
+      "d": "M 378 44 L 422 44 L 400 80 Z",
+      "fill": true
+    },
+    {
+      "type": "circle",
+      "cx": 730,
+      "cy": 460,
+      "r": 8,
+      "fill": true
+    }
+  ],
+  "annotations": [
+    {
+      "text": "SYNTHETIC",
+      "x": 20,
+      "y": 30,
+      "size": 22,
+      "anchor": "start",
+      "rotate": 0
+    }
+  ],
+  "source": {
+    "file": null,
+    "sha256": null,
+    "ref": "synthetic"
+  },
+  "qa": {
+    "confidence": null,
+    "warnings": []
+  },
+  "status": "approved",
+  "revision": 1,
+  "series": null,
+  "manufacturer": null,
+  "partNumbers": [],
+  "shell": null,
+  "notes": null,
+  "tags": [
+    "synthetic"
+  ],
+  "createdAt": "2026-09-27",
+  "updatedAt": "2026-09-27"
+}

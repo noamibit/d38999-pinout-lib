@@ -52,7 +52,7 @@
 - `id` = `prefix + number`, уникален в пределах family. Имя файла = `id`.
 - `prefix`: `^[A-Z]{1,2}$`, `number`: `^[0-9]{1,3}$`.
 - `label`: непустая строка, **регистр значим**, уникальна в пределах arrangement.
-- `text` у contact — положение label как на source. `anchor`: `start | middle | end`.
+- `text` у contact — положение label как на source: `x` — точка привязки по `anchor` (`start` = левый край, `middle` = центр, `end` = правый край), `y` — вертикальный центр label (`dominant-baseline: central`), `size` ≈ высота глифа. Если `text` нет — label рисуется над contact.
 - `annotations` — текст, не привязанный к contact; при mirror не зеркалится (только переезжает).
 - `shapes` — вспомогательная графика (keying, линии, контуры); при mirror зеркалится как геометрия.
 - `expectedContacts` — вводится admin'ом по источнику; если задан, validate проверяет `contacts.length`.

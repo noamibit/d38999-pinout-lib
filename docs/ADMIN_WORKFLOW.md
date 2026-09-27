@@ -7,12 +7,12 @@
 cp ~/sources/H35.png incoming/
 
 # 2. конвертация (batch — весь incoming/)
-npm run convert            # → staging/H35.json, staging/H35.svg
+npm run convert            # → staging/d38999/H35.json + .svg + .source.png
 
 # 3. QA
 npm run qa                 # локальный UI: Original | SVG | Overlay → Approve / Reject
 
-# 4. approve переносит staging/H35.* → library/d38999/, status=approved
+# 4. approve переносит staging/d38999/H35.{json,svg} → library/d38999/, status=approved
 
 # 5. проверка и публикация
 npm run validate

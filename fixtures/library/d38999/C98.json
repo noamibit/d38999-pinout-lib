@@ -1,0 +1,458 @@
+{
+  "schemaVersion": 1,
+  "id": "C98",
+  "family": "D38999",
+  "prefix": "C",
+  "number": "98",
+  "title": "C98",
+  "viewCaption": "SYNTHETIC TEST DATA — not a real arrangement",
+  "expectedContacts": 28,
+  "canvas": {
+    "width": 800,
+    "height": 800
+  },
+  "insert": {
+    "cx": 400,
+    "cy": 400,
+    "r": 360
+  },
+  "contacts": [
+    {
+      "label": "A",
+      "cx": 477.8,
+      "cy": 322.2,
+      "r": 34,
+      "style": "hollow",
+      "text": {
+        "x": 508.4,
+        "y": 276,
+        "size": 30.6,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "B",
+      "cx": 477.8,
+      "cy": 477.8,
+      "r": 34,
+      "style": "hollow",
+      "text": {
+        "x": 508.4,
+        "y": 431.5,
+        "size": 30.6,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "C",
+      "cx": 322.2,
+      "cy": 477.8,
+      "r": 34,
+      "style": "hollow",
+      "text": {
+        "x": 352.8,
+        "y": 431.5,
+        "size": 30.6,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "D",
+      "cx": 322.2,
+      "cy": 322.2,
+      "r": 34,
+      "style": "hollow",
+      "text": {
+        "x": 352.8,
+        "y": 276,
+        "size": 30.6,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "E",
+      "cx": 400,
+      "cy": 140,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 410.8,
+        "y": 122.4,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "F",
+      "cx": 467.3,
+      "cy": 148.9,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 478.1,
+        "y": 131.3,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "G",
+      "cx": 530,
+      "cy": 174.8,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 540.8,
+        "y": 157.2,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "H",
+      "cx": 583.8,
+      "cy": 216.2,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 594.6,
+        "y": 198.6,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "J",
+      "cx": 625.2,
+      "cy": 270,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 636,
+        "y": 252.4,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "K",
+      "cx": 651.1,
+      "cy": 332.7,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 661.9,
+        "y": 315.1,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "L",
+      "cx": 660,
+      "cy": 400,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 670.8,
+        "y": 382.4,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "M",
+      "cx": 651.1,
+      "cy": 467.3,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 661.9,
+        "y": 449.7,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "N",
+      "cx": 625.2,
+      "cy": 530,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 636,
+        "y": 512.4,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "P",
+      "cx": 583.8,
+      "cy": 583.8,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 594.6,
+        "y": 566.2,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "R",
+      "cx": 530,
+      "cy": 625.2,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 540.8,
+        "y": 607.6,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "S",
+      "cx": 467.3,
+      "cy": 651.1,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 478.1,
+        "y": 633.5,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "T",
+      "cx": 400,
+      "cy": 660,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 410.8,
+        "y": 642.4,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "U",
+      "cx": 332.7,
+      "cy": 651.1,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 343.5,
+        "y": 633.5,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "V",
+      "cx": 270,
+      "cy": 625.2,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 280.8,
+        "y": 607.6,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "W",
+      "cx": 216.2,
+      "cy": 583.8,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 227,
+        "y": 566.2,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "X",
+      "cx": 174.8,
+      "cy": 530,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 185.6,
+        "y": 512.4,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "Y",
+      "cx": 148.9,
+      "cy": 467.3,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 159.7,
+        "y": 449.7,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "Z",
+      "cx": 140,
+      "cy": 400,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 150.8,
+        "y": 382.4,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "a",
+      "cx": 148.9,
+      "cy": 332.7,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 159.7,
+        "y": 315.1,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "b",
+      "cx": 174.8,
+      "cy": 270,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 185.6,
+        "y": 252.4,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "c",
+      "cx": 216.2,
+      "cy": 216.2,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 227,
+        "y": 198.6,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "d",
+      "cx": 270,
+      "cy": 174.8,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 280.8,
+        "y": 157.2,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "e",
+      "cx": 332.7,
+      "cy": 148.9,
+      "r": 12,
+      "style": "hollow",
+      "text": {
+        "x": 343.5,
+        "y": 131.3,
+        "size": 14,
+        "anchor": "start",
+        "rotate": 0
+      }
+    }
+  ],
+  "shapes": [
+    {
+      "type": "path",
+      "d": "M 378 44 L 422 44 L 400 80 Z",
+      "fill": true
+    },
+    {
+      "type": "circle",
+      "cx": 730,
+      "cy": 460,
+      "r": 8,
+      "fill": true
+    }
+  ],
+  "annotations": [
+    {
+      "text": "SYNTHETIC",
+      "x": 20,
+      "y": 30,
+      "size": 22,
+      "anchor": "start",
+      "rotate": 0
+    }
+  ],
+  "source": {
+    "file": null,
+    "sha256": null,
+    "ref": "synthetic"
+  },
+  "qa": {
+    "confidence": null,
+    "warnings": []
+  },
+  "status": "approved",
+  "revision": 1,
+  "series": null,
+  "manufacturer": null,
+  "partNumbers": [],
+  "shell": null,
+  "notes": null,
+  "tags": [
+    "synthetic"
+  ],
+  "createdAt": "2026-09-27",
+  "updatedAt": "2026-09-27"
+}

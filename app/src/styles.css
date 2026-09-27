@@ -1,0 +1,260 @@
+:root {
+  --bg: #f4f6f8;
+  --fg: #0b0f14;
+  --muted: #55606a;
+  --accent: #0a6cff;
+  --btn-bg: #ffffff;
+  --btn-border: #c7cdd3;
+  --btn-active-bg: #0a6cff;
+  --btn-active-fg: #ffffff;
+  --danger: #b00020;
+  --mirror: #ff9500;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0f14;
+    --fg: #eef2f6;
+    --muted: #9aa7b2;
+    --accent: #4da3ff;
+    --btn-bg: #1a222b;
+    --btn-border: #333e48;
+    --btn-active-bg: #4da3ff;
+    --btn-active-fg: #071019;
+    --mirror: #ffb020;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.home {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 16px;
+}
+
+.home-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.home-header h1 {
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.lib-version {
+  font-size: 0.7rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.section-title {
+  font-size: 1rem;
+  color: var(--muted);
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.section-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 10px;
+}
+
+.big-btn,
+.back-btn,
+.tool-btn {
+  min-height: 56px;
+  min-width: 56px;
+  border-radius: 12px;
+  border: 1px solid var(--btn-border);
+  background: var(--btn-bg);
+  color: var(--fg);
+  font-size: 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.big-btn:active,
+.back-btn:active,
+.tool-btn:active {
+  background: var(--btn-active-bg);
+  color: var(--btn-active-fg);
+}
+
+.back-btn {
+  font-size: 1rem;
+  padding: 0 12px;
+}
+
+.error {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.loading {
+  color: var(--muted);
+}
+
+/* Viewer */
+
+.viewer {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.viewer.is-mirrored {
+  outline: 6px solid var(--mirror);
+  outline-offset: -6px;
+}
+
+.mirror-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  text-align: center;
+  background: var(--mirror);
+  color: #1a1200;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  padding: 4px 0;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.viewer-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: var(--btn-bg);
+  border-bottom: 1px solid var(--btn-border);
+  flex: 0 0 auto;
+}
+
+.tool-btn {
+  font-size: 0.95rem;
+  padding: 0 10px;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.tool-btn.active {
+  background: var(--btn-active-bg);
+  color: var(--btn-active-fg);
+  border-color: var(--btn-active-bg);
+}
+
+.viewer-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+
+.viewer-title-main {
+  font-weight: 700;
+  font-size: 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.viewer-caption {
+  font-size: 0.72rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.viewer-stage {
+  flex: 1 1 auto;
+  position: relative;
+  min-height: 0;
+}
+
+.pinout-canvas {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  background: var(--bg);
+}
+
+.pinout-canvas svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.update-banner {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--accent);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.update-banner button {
+  background: #fff;
+  color: var(--accent);
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
