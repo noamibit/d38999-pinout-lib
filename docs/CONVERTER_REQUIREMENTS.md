@@ -1,7 +1,8 @@
 # Converter Requirements
 
 ## Вход
-- PNG / JPG / screenshot / PDF (первая страница или указанная).
+- **Основной путь V1: PNG / JPG / screenshot.** Только он тестируется и оптимизируется.
+- PDF — best-effort (первая страница), поддержка не убирается (дёшево держать), но без гарантий качества и без отдельных тестов/оптимизации в V1.
 - **Один файл = один arrangement.** Имя файла = ID (`H35.png`).
 - Source заранее выбран admin'ом: чёткий, ориентирован правильно, достаточное разрешение, без сильных искажений.
 - Опционально sidecar `incoming/H35.meta.json`: `{ "expectedContacts": 55, "viewCaption": "...", "ref": "..." }`.
@@ -13,7 +14,7 @@
 Поворот, зеркалирование, поиск diagram в документе, keying, pin/socket, mating/rear.
 
 ## Pipeline
-1. **Input adapter** — растеризация PDF (PyMuPDF, ≥ 300 dpi), нормализация в PNG, `canvas` = размер raster.
+1. **Input adapter** — PNG/JPG напрямую; PDF растеризуется (PyMuPDF, ≥ 300 dpi) как best-effort. Нормализация в PNG, `canvas` = размер raster.
 2. **Preprocess** — grayscale, threshold, denoise.
 3. **Geometry** — outer insert circle; contact circles (HoughCircles + contour fitting); кластеризация диаметров; вспомогательные линии (опционально).
 4. **Text** — детекция текстовых регионов, OCR / AI vision. AI используется только для чтения символов, координаты берутся из CV.
