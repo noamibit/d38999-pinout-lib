@@ -32,6 +32,14 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install converter deps
+        run: pip install -r tools/converter/requirements.txt
+      - name: Converter tests (synthetic-only; no ANTHROPIC_API_KEY in CI)
+        run: python -m pytest tests -q
+        working-directory: tools/converter
       - name: Build (production library)
         if: ${{ inputs.library != 'demo' }}
         run: npm run build

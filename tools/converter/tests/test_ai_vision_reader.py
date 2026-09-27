@@ -4,9 +4,13 @@ the CV/box-detection side is exercised elsewhere (test_roundtrip.py)."""
 from __future__ import annotations
 
 import json
+import sys
+from pathlib import Path
 
 import numpy as np
 import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from d38999conv.text import AIVisionReader
 
