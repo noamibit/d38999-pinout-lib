@@ -4,6 +4,10 @@ CV/box detection never guesses characters itself.
 """
 from __future__ import annotations
 
+import base64
+import json
+import os
+import re
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -82,20 +86,104 @@ class TesseractReader:
         return text, conf
 
 
+def _encode_png(crop: np.ndarray, upscale_to: int = 96) -> str:
+    """Upscale a (likely tiny) label crop before encoding -- stylized connector-diagram
+    fonts at native crop resolution (often well under 30px tall) are hard for a vision
+    model to read; a clean nearest/cubic upscale gives it more pixels to work with
+    without inventing detail."""
+    h, w = crop.shape[:2]
+    scale = max(1.0, upscale_to / max(h, w))
+    if scale > 1.0:
+        crop = cv2.resize(crop, (max(1, round(w * scale)), max(1, round(h * scale))), interpolation=cv2.INTER_CUBIC)
+    ok, buf = cv2.imencode(".png", crop)
+    if not ok:
+        raise RuntimeError("failed to encode label crop as PNG")
+    return base64.b64encode(buf.tobytes()).decode("ascii")
+
+
+def _extract_json_array(text: str) -> str:
+    """The model is asked to reply with only a JSON array, but strip a ```json
+    fence or leading/trailing prose defensively."""
+    m = re.search(r"\[.*\]", text, re.DOTALL)
+    return m.group(0) if m else text
+
+
 class AIVisionReader:
-    """Interface stub for a future Claude-vision-based reader. No network calls are
-    made here; wiring this up (batching crops into a vision request, parsing the
-    response into per-crop text) is future work for when real sources arrive.
+    """Reads contact labels via the Claude API (vision).
+
+    Batches every label crop for one arrangement into a single request (see
+    `read_batch`) -- `read()` exists only to satisfy the single-crop `LabelReader`
+    protocol for callers that don't batch, and is far less efficient (one API call
+    per contact).
+
+    Requires the `anthropic` package and an `ANTHROPIC_API_KEY` in the environment.
+    Never pass the key as a CLI argument or hardcode it -- set it in your own shell
+    or a local (gitignored) `.env` before running the converter with `--reader ai`.
     """
 
-    def __init__(self, *_args, **_kwargs) -> None:
-        raise NotImplementedError(
-            "AIVisionReader is an interface stub; implement read() with a real "
-            "vision API call before use."
-        )
+    def __init__(self, model: str = "claude-sonnet-5", client=None) -> None:
+        """`client`: inject a fake for testing (must expose `.messages.create(...)`
+        with the same shape as the real SDK). Left as None in normal use, which
+        constructs a real `anthropic.Anthropic` client from `ANTHROPIC_API_KEY`."""
+        if client is not None:
+            self._client = client
+        else:
+            try:
+                import anthropic
+            except ImportError as e:
+                raise RuntimeError("anthropic package not installed (pip install anthropic)") from e
+            api_key = os.environ.get("ANTHROPIC_API_KEY")
+            if not api_key:
+                raise RuntimeError(
+                    "ANTHROPIC_API_KEY not set. Set it in your own shell (or a local, "
+                    "gitignored .env) before running with --reader ai; it is never read "
+                    "from a CLI argument or committed anywhere."
+                )
+            self._client = anthropic.Anthropic(api_key=api_key)
+        self._model = model
 
     def read(self, crop: np.ndarray) -> tuple[str, float]:
-        raise NotImplementedError
+        return self.read_batch([crop])[0]
+
+    def read_batch(self, crops: list[np.ndarray]) -> list[tuple[str, float]]:
+        if not crops:
+            return []
+        prompt = (
+            "Each image below is a cropped label from a D38999 connector pin "
+            "arrangement diagram, showing exactly one contact's identifying letter "
+            "code (e.g. 'A', 'b', 'AA', 'a*'). Read each crop exactly as printed, "
+            "preserving case -- uppercase and lowercase are different, distinct "
+            "contacts. Reply with ONLY a JSON array of strings, one per image in "
+            'the same order, e.g. ["A","b","AA"]. If a crop is unreadable, empty, '
+            'or not a label, use "?" for that entry. No other text.'
+        )
+        content: list[dict] = [{"type": "text", "text": prompt}]
+        for crop in crops:
+            content.append(
+                {
+                    "type": "image",
+                    "source": {"type": "base64", "media_type": "image/png", "data": _encode_png(crop)},
+                }
+            )
+        resp = self._client.messages.create(
+            model=self._model,
+            max_tokens=4000,
+            messages=[{"role": "user", "content": content}],
+        )
+        raw = "".join(b.text for b in resp.content if getattr(b, "type", None) == "text")
+        try:
+            texts = json.loads(_extract_json_array(raw))
+            if not isinstance(texts, list):
+                raise ValueError("response is not a JSON array")
+        except Exception:
+            return [("?", 0.0)] * len(crops)
+
+        texts = [str(t) if t is not None else "?" for t in texts]
+        if len(texts) < len(crops):
+            texts += ["?"] * (len(crops) - len(texts))
+        elif len(texts) > len(crops):
+            texts = texts[: len(crops)]
+        return [(t, 0.0 if t == "?" else 0.9) for t in texts]
 
 
 def _mask_out_circles(binary: np.ndarray, circles: list[Circle], insert: Circle | None, pad: float = 1.15) -> np.ndarray:
@@ -206,14 +294,18 @@ def _boxes_close(a: list[int], b: list[int], gap: float) -> bool:
 
 
 def read_labels(gray: np.ndarray, boxes: list[LabelBox], reader: LabelReader, pad: int = 2) -> list[tuple[LabelBox, str, float]]:
+    """Reads each box's crop via `reader`. If `reader` exposes `read_batch` (e.g.
+    AIVisionReader), all crops for this arrangement go in one call instead of one
+    API round-trip per contact."""
     h, w = gray.shape[:2]
-    out = []
+    crops = []
     for b in boxes:
         x0 = max(0, b.x0 - pad)
         y0 = max(0, b.y0 - pad)
         x1 = min(w, b.x1 + pad)
         y1 = min(h, b.y1 + pad)
-        crop = gray[y0:y1, x0:x1]
-        text, conf = reader.read(crop)
-        out.append((b, text, conf))
-    return out
+        crops.append(gray[y0:y1, x0:x1])
+
+    read_batch = getattr(reader, "read_batch", None)
+    results = read_batch(crops) if read_batch else [reader.read(c) for c in crops]
+    return [(b, text, conf) for b, (text, conf) in zip(boxes, results)]

@@ -20,6 +20,31 @@ cd tools/converter
 .venv/Scripts/python.exe -m d38999conv convert ../../incoming --out ../../staging --reader null
 ```
 
+`--reader` selects how contact labels are read: `null` (default; no OCR, labels
+come out as placeholders `#1`, `#2`... -- geometry-only, useful for measuring
+recall before wiring up reading) | `tesseract` (local, untested against real
+connector-diagram fonts, needs pytesseract + the tesseract binary) | `ai` (Claude
+vision, batches every label crop for one arrangement into a single API request --
+see below).
+
+### Reading labels with Claude vision (`--reader ai`)
+
+```
+export ANTHROPIC_API_KEY=sk-...     # your own key, your own shell -- never pass
+                                     # it as a CLI arg or commit it anywhere
+cd tools/converter
+.venv/Scripts/python.exe -m d38999conv convert ../../incoming --out ../../staging --reader ai
+```
+
+Costs real API usage (roughly a few cents per arrangement -- one request per
+source, with every contact's label crop as a separate image in that one request,
+not one request per contact). If the key is missing or the package isn't
+installed, `_pick_reader` warns and falls back to `NullReader` rather than
+failing the whole batch. Response parsing (JSON-array extraction, markdown-fence
+stripping, short/long response padding, malformed-response fallback to `"?"`) is
+unit-tested against a fake client in `tests/test_ai_vision_reader.py` -- no real
+API calls are made in tests.
+
 For each `incoming/<ID>.{png,jpg,pdf}` (+ optional `incoming/<ID>.meta.json` sidecar
 with `expectedContacts`), writes:
 - `staging/d38999/<ID>.json` -- geometry model, `status: "draft"`
@@ -44,10 +69,14 @@ node tools/library/src/cli.ts render --library staging --dev
   a real ring's hole has a circular parent) and via repeated-size clustering. Snaps
   radii to discrete clusters (`cluster_radii`) and estimates hollow/filled style.
 - `text.py` -- masks out detected circle ink, connected-components the remainder into
-  glyphs, groups glyphs into label boxes. `LabelReader` protocol with `NullReader`
-  (returns `"?"`, confidence 0), optional `TesseractReader` (activates only if
-  `pytesseract` + the `tesseract` binary are both present; never required), and an
-  `AIVisionReader` interface stub (no network calls -- future Claude-vision wiring).
+  glyphs, groups glyphs into label boxes (with a size cap that drops any box wildly
+  larger than a single glyph, so a chain of nearby glyphs can't transitively merge
+  into a bogus giant label spanning unrelated ink -- see the real-source findings
+  below). `LabelReader` protocol with `NullReader` (returns `"?"`, confidence 0),
+  optional `TesseractReader` (activates only if `pytesseract` + the `tesseract`
+  binary are both present; never required), and `AIVisionReader` (Claude vision,
+  reads `ANTHROPIC_API_KEY` from the environment, batches all of one arrangement's
+  crops into a single request via `read_batch`).
 - `assign.py` -- greedy nearest-neighbor label-box-to-contact assignment; records the
   label's real on-source anchor (`text.x/y`, `dominant-baseline: central` per
   `render.ts`), size (glyph height), and `start`/`end` anchor derived from which side
@@ -55,15 +84,7 @@ node tools/library/src/cli.ts render --library staging --dev
 - `checks.py` -- QA warnings (0 contacts, duplicate/unlabeled/unread labels, orphan
   label boxes, `expectedContacts` mismatch, overlaps, out-of-canvas, sequence gaps)
   and an overall `qa.confidence`.
-- `cli.py` -- `python -m d38999conv convert <in> --out <out> [--reader null|tesseract]`.
-
-## Plugging in an AI vision reader
-
-Implement `d38999conv.text.LabelReader.read(crop) -> (text, confidence)` against a
-real vision API call (e.g. batching contact-label crops into one Claude request) and
-pass an instance to `cli.convert_one(..., reader=...)`, or extend `_pick_reader` in
-`cli.py` with a new `--reader` choice. Geometry/coordinates never come from the
-reader -- only the label string and a confidence.
+- `cli.py` -- `python -m d38999conv convert <in> --out <out> [--reader null|tesseract|ai]`.
 
 ## Testing (synthetic round-trip)
 
@@ -178,11 +199,14 @@ not-yet-implemented label reader, not the overall architecture.
   only crudely approximate. Need 5-15 real sources (per
   `docs/CONVERTER_REQUIREMENTS.md`'s development strategy) to find the real
   recurring failure modes.
-- **Label reading is not implemented.** `NullReader` always returns `"?"`; text
-  detection (bounding boxes) is exercised and tested, but no OCR/AI reader has been
-  wired up or measured. `TesseractReader` exists but wasn't evaluated (Tesseract
-  isn't installed in this environment) -- accuracy on stylized connector-diagram
-  fonts is unknown and likely to need the AI vision path instead.
+- **Label reading is wired up (`AIVisionReader`, `--reader ai`) but not yet measured
+  against a real API key/response** -- response-parsing logic (JSON extraction,
+  fence-stripping, malformed/short/long responses) is unit-tested against a fake
+  client, but character-accuracy on real stylized connector-diagram fonts is
+  unknown until run with a real `ANTHROPIC_API_KEY` against real crops. This is
+  the next thing to validate once a key is available. `TesseractReader` exists but
+  wasn't evaluated (Tesseract isn't installed in this environment) and is expected
+  to do worse on these fonts than the vision path.
 - **`shapes`/`annotations` (keying triangles, "MASTER KEY" text, helper lines) are
   not extracted at all** -- the CLI always writes `"shapes": []`, `"annotations": []`.
   Real arrangements will need these for a complete conversion.

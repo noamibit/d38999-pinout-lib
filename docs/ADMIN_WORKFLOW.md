@@ -8,6 +8,10 @@ cp ~/sources/H35.png incoming/
 
 # 2. конвертация (batch — весь incoming/)
 npm run convert            # → staging/d38999/H35.json (draft) + .source.png
+                            # labels: geometry-only по умолчанию (placeholder #1, #2…);
+                            # для реального чтения labels — export ANTHROPIC_API_KEY=...
+                            # (свой shell, никогда не коммитить) и
+                            # tools/converter/.venv/Scripts/python.exe -m d38999conv convert incoming --out staging --reader ai
 
 # 3. QA — http://localhost:4550
 npm run qa                 # Original | Generated SVG | Overlay → Approve / Reject

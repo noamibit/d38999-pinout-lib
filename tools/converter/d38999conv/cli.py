@@ -19,7 +19,7 @@ from .adapter import load_source
 from .assign import assign_labels_to_contacts
 from .checks import run_checks
 from .geometry import detect_geometry
-from .text import NullReader, TesseractReader, detect_label_boxes, read_labels
+from .text import AIVisionReader, NullReader, TesseractReader, detect_label_boxes, read_labels
 
 SUPPORTED_SUFFIXES = {".png", ".jpg", ".jpeg", ".pdf"}
 ID_RE = re.compile(r"^([A-Z]{1,2})([0-9]{1,3})$")
@@ -33,6 +33,12 @@ def _pick_reader(name: str):
             return TesseractReader()
         except RuntimeError as e:
             print(f"warning: tesseract reader unavailable ({e}); falling back to NullReader", file=sys.stderr)
+            return NullReader()
+    if name == "ai":
+        try:
+            return AIVisionReader()
+        except RuntimeError as e:
+            print(f"warning: AI vision reader unavailable ({e}); falling back to NullReader", file=sys.stderr)
             return NullReader()
     return NullReader()
 
@@ -175,7 +181,7 @@ def main(argv: list[str] | None = None) -> int:
     p_convert = sub.add_parser("convert", help="convert a directory of source files to staging JSON")
     p_convert.add_argument("input", help="directory containing source PNG/JPG/PDF files")
     p_convert.add_argument("--out", default="staging", help="output staging directory")
-    p_convert.add_argument("--reader", default="null", choices=["null", "tesseract"], help="label reader backend")
+    p_convert.add_argument("--reader", default="null", choices=["null", "tesseract", "ai"], help="label reader backend")
     p_convert.set_defaults(func=cmd_convert)
 
     args = parser.parse_args(argv)
