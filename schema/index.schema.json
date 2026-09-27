@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://d38999-pinout-lib/schema/index.schema.json",
+  "title": "Library index (generated)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "libraryVersion", "builtAt", "families"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "libraryVersion": { "type": "string" },
+    "builtAt": { "type": "string" },
+    "families": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "items"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "prefix", "number", "title", "svg", "svgMirror", "contacts"],
+              "properties": {
+                "id": { "type": "string" },
+                "prefix": { "type": "string" },
+                "number": { "type": "string" },
+                "title": { "type": "string" },
+                "svg": { "type": "string" },
+                "svgMirror": { "type": "string" },
+                "viewCaption": { "type": ["string", "null"] },
+                "contacts": { "type": "integer" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

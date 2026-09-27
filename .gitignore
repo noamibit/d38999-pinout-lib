@@ -1,0 +1,11 @@
+node_modules/
+dist/
+app/public/library/
+incoming/*
+!incoming/.gitkeep
+staging/*
+!staging/.gitkeep
+tools/converter/.venv/
+__pycache__/
+*.pyc
+.DS_Store
