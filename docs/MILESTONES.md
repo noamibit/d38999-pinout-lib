@@ -32,9 +32,11 @@
 - **Блокер:** нужны реальные source images от admin.
 - **Done:** метрики из CONVERTER_REQUIREMENTS на 5–10 images, решение о роли AI.
 
-## M5 — QA tool ☐
-- Локальный web UI: Original | SVG | Overlay (opacity slider), warnings, Approve/Reject (перенос в `library/`).
-- Optional: правка label, сдвиг/удаление/добавление contact.
+## M5 — QA tool ☑
+- Локальный web UI (`npm run qa`, http://localhost:4550): Original | Generated SVG | Overlay (opacity sliders), errors/warnings, confidence.
+- Approve: рендерит финальный SVG, валидирует production-правилами, пишет в `library/`, чистит staging. Reject: переносит в `staging/rejected/`.
+- Проверено end-to-end на реальном F28.png: overlay совпал с оригиналом, approve корректно заблокирован при contacts≠expected, reject перенёс файлы.
+- Optional (не сделано): правка label, сдвиг/удаление/добавление contact — отложено до реальной оценки точности converter на большем сэмпле.
 
 ## M6 — Batch ~50 ☐
 - Прогон всех sources, итерации по recurring errors, approve.
