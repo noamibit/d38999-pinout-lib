@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "id": "A98",
+  "family": "D38999",
+  "prefix": "A",
+  "number": "98",
+  "title": "A98",
+  "viewCaption": "SYNTHETIC TEST DATA — not a real arrangement",
+  "expectedContacts": 7,
+  "canvas": {
+    "width": 800,
+    "height": 800
+  },
+  "insert": {
+    "cx": 400,
+    "cy": 400,
+    "r": 360
+  },
+  "contacts": [
+    {
+      "label": "A",
+      "cx": 400,
+      "cy": 400,
+      "r": 26,
+      "style": "hollow",
+      "text": {
+        "x": 423.4,
+        "y": 364.6,
+        "size": 23.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "B",
+      "cx": 400,
+      "cy": 230,
+      "r": 26,
+      "style": "hollow",
+      "text": {
+        "x": 423.4,
+        "y": 194.6,
+        "size": 23.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "C",
+      "cx": 547.2,
+      "cy": 315,
+      "r": 26,
+      "style": "hollow",
+      "text": {
+        "x": 570.6,
+        "y": 279.6,
+        "size": 23.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "D",
+      "cx": 547.2,
+      "cy": 485,
+      "r": 26,
+      "style": "hollow",
+      "text": {
+        "x": 570.6,
+        "y": 449.6,
+        "size": 23.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "E",
+      "cx": 400,
+      "cy": 570,
+      "r": 26,
+      "style": "hollow",
+      "text": {
+        "x": 423.4,
+        "y": 534.6,
+        "size": 23.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "F",
+      "cx": 252.8,
+      "cy": 485,
+      "r": 26,
+      "style": "hollow",
+      "text": {
+        "x": 276.2,
+        "y": 449.6,
+        "size": 23.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    },
+    {
+      "label": "G",
+      "cx": 252.8,
+      "cy": 315,
+      "r": 26,
+      "style": "hollow",
+      "text": {
+        "x": 276.2,
+        "y": 279.6,
+        "size": 23.4,
+        "anchor": "start",
+        "rotate": 0
+      }
+    }
+  ],
+  "shapes": [
+    {
+      "type": "path",
+      "d": "M 378 44 L 422 44 L 400 80 Z",
+      "fill": true
+    },
+    {
+      "type": "circle",
+      "cx": 730,
+      "cy": 460,
+      "r": 8,
+      "fill": true
+    }
+  ],
+  "annotations": [
+    {
+      "text": "SYNTHETIC",
+      "x": 20,
+      "y": 30,
+      "size": 22,
+      "anchor": "start",
+      "rotate": 0
+    }
+  ],
+  "source": {
+    "file": null,
+    "sha256": null,
+    "ref": "synthetic"
+  },
+  "qa": {
+    "confidence": null,
+    "warnings": []
+  },
+  "status": "approved",
+  "revision": 1,
+  "series": null,
+  "manufacturer": null,
+  "partNumbers": [],
+  "shell": null,
+  "notes": null,
+  "tags": [
+    "synthetic"
+  ],
+  "createdAt": "2026-09-27",
+  "updatedAt": "2026-09-27"
+}

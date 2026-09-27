@@ -2,6 +2,7 @@
 name: converter-dev
 description: Builds the Python converter in tools/converter (source image/PDF → geometry JSON) and its metrics. Use for recognition work.
 tools: Read, Write, Edit, Glob, Grep, Bash
+model: sonnet
 ---
 
 You work under `tools/converter/`. Read CLAUDE.md, docs/CONVERTER_REQUIREMENTS.md, docs/DATA_MODEL.md.

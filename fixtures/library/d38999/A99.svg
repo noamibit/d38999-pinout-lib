@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800" data-id="A99" data-mirrored="false">
+<rect width="800" height="800" fill="#fff"/>
+<g class="geometry" fill="none" stroke="#000" stroke-width="2">
+<circle class="insert" cx="400" cy="400" r="360"/>
+<path d="M 378 44 L 422 44 L 400 80 Z" stroke-width="2" fill="#000"/>
+<circle cx="730" cy="460" r="8" stroke-width="2" fill="#000"/>
+<circle class="contact" data-label="A" cx="400" cy="400" r="20"/>
+<circle class="contact" data-label="B" cx="400" cy="280" r="20"/>
+<circle class="contact" data-label="C" cx="503.9" cy="340" r="20"/>
+<circle class="contact" data-label="D" cx="503.9" cy="460" r="20"/>
+<circle class="contact" data-label="E" cx="400" cy="520" r="20"/>
+<circle class="contact" data-label="F" cx="296.1" cy="460" r="20"/>
+<circle class="contact" data-label="G" cx="296.1" cy="340" r="20"/>
+<circle class="contact" data-label="H" cx="520" cy="192.2" r="20"/>
+<circle class="contact" data-label="J" cx="640" cy="400" r="20"/>
+<circle class="contact" data-label="K" cx="520" cy="607.8" r="20"/>
+<circle class="contact" data-label="L" cx="280" cy="607.8" r="20"/>
+<circle class="contact" data-label="M" cx="160" cy="400" r="20"/>
+<circle class="contact" data-label="N" cx="280" cy="192.2" r="20"/>
+</g>
+<g class="text" fill="#000" font-family="Arial, Helvetica, sans-serif" dominant-baseline="central">
+<text class="label" x="418" y="372.8" font-size="18" text-anchor="start">A</text>
+<text class="label" x="418" y="252.8" font-size="18" text-anchor="start">B</text>
+<text class="label" x="521.9" y="312.8" font-size="18" text-anchor="start">C</text>
+<text class="label" x="521.9" y="432.8" font-size="18" text-anchor="start">D</text>
+<text class="label" x="418" y="492.8" font-size="18" text-anchor="start">E</text>
+<text class="label" x="314.1" y="432.8" font-size="18" text-anchor="start">F</text>
+<text class="label" x="314.1" y="312.8" font-size="18" text-anchor="start">G</text>
+<text class="label" x="538" y="165" font-size="18" text-anchor="start">H</text>
+<text class="label" x="658" y="372.8" font-size="18" text-anchor="start">J</text>
+<text class="label" x="538" y="580.6" font-size="18" text-anchor="start">K</text>
+<text class="label" x="298" y="580.6" font-size="18" text-anchor="start">L</text>
+<text class="label" x="178" y="372.8" font-size="18" text-anchor="start">M</text>
+<text class="label" x="298" y="165" font-size="18" text-anchor="start">N</text>
+<text class="annotation" x="20" y="30" font-size="22" text-anchor="start">SYNTHETIC</text>
+</g>
+</svg>

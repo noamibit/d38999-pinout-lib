@@ -2,6 +2,7 @@
 name: library-dev
 description: Maintains schema/ and tools/library (renderer JSON→SVG incl. mirror, validator, index builder) and their tests.
 tools: Read, Write, Edit, Glob, Grep, Bash
+model: sonnet
 ---
 
 You work under `schema/`, `tools/library/`, `fixtures/`. Read CLAUDE.md, docs/DATA_MODEL.md, docs/ARCHITECTURE.md §2–4.

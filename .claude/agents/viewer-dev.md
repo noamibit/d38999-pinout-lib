@@ -2,6 +2,7 @@
 name: viewer-dev
 description: Implements the PWA viewer in app/ (React + TS + Vite, pan/zoom, mirror, wake lock, offline). Use for any change under app/.
 tools: Read, Write, Edit, Glob, Grep, Bash
+model: sonnet
 ---
 
 You work only under `app/` (plus `.github/workflows` if asked). Read CLAUDE.md, docs/PRODUCT_REQUIREMENTS.md §4, docs/ARCHITECTURE.md §4–5, docs/DATA_MODEL.md §2 first.

@@ -1,0 +1,20 @@
+{
+  "name": "d38999-pinout-lib",
+  "private": true,
+  "type": "module",
+  "workspaces": ["app", "tools/library"],
+  "engines": { "node": ">=23.6" },
+  "scripts": {
+    "test": "npm -w tools/library test",
+    "typecheck": "npm -w tools/library run typecheck && npm -w app run typecheck",
+    "validate": "node tools/library/src/cli.ts validate --library library",
+    "validate:fixtures": "node tools/library/src/cli.ts validate --library fixtures/library --dev",
+    "render": "node tools/library/src/cli.ts render --library library",
+    "render:fixtures": "node tools/library/src/cli.ts render --library fixtures/library --dev",
+    "build:library": "node tools/library/src/cli.ts build --library library --out app/public/library",
+    "build:library:fixtures": "node tools/library/src/cli.ts build --library fixtures/library --out app/public/library --dev",
+    "dev": "npm run build:library:fixtures && npm -w app run dev",
+    "build": "npm run validate && npm run build:library && npm -w app run build",
+    "build:demo": "npm run validate:fixtures && npm run build:library:fixtures && npm -w app run build"
+  }
+}
