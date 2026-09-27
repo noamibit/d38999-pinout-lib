@@ -82,6 +82,85 @@ def detect_insert_circle(gray: np.ndarray) -> Circle | None:
     return best
 
 
+def _detect_axis_lines(binary: np.ndarray, insert: Circle, angle_tol_deg: float = 3.0) -> list[tuple[int, int, int, int]]:
+    """Find long, thin, axis-aligned line segments whose infinite extension passes
+    through the insert center -- the "crosshair" some source diagrams draw for
+    orientation. Deliberately narrow (long + straight + axis-aligned + centered) so
+    it doesn't fire on short keying marks, ring arcs, or diagonal features."""
+    # Note: a much shorter minLineLength was tried (to catch crosshair fragments
+    # broken up by closely-clustered on-axis contacts, e.g. D19's K/U/V/R/D row)
+    # but measured *worse* aggregate recall on the real sample set -- short,
+    # loosely-constrained segments picked up collateral false positives elsewhere
+    # (H53/H55 recall dropped). Kept at this length: it fixes the isolated/
+    # moderately-spaced on-axis case (F28, H53, H55, J19 all measurably improved)
+    # without that regression. A tightly-spaced cluster like D19's is a known
+    # remaining gap -- see README.
+    min_len = max(20, int(insert.r * 0.4))
+    lines = cv2.HoughLinesP(
+        binary,
+        1,
+        np.pi / 180,
+        threshold=max(10, int(min_len * 0.5)),
+        minLineLength=min_len,
+        maxLineGap=max(4, int(insert.r * 0.03)),
+    )
+    if lines is None:
+        return []
+    hits: list[tuple[int, int, int, int]] = []
+    for x1, y1, x2, y2 in lines[:, 0]:
+        dx, dy = float(x2 - x1), float(y2 - y1)
+        length = (dx * dx + dy * dy) ** 0.5
+        if length < min_len:
+            continue
+        angle = abs(np.degrees(np.arctan2(dy, dx)))
+        is_horiz = angle < angle_tol_deg or angle > 180 - angle_tol_deg
+        is_vert = abs(angle - 90) < angle_tol_deg
+        if not (is_horiz or is_vert):
+            continue
+        # Perpendicular distance from the known insert center to this segment's
+        # infinite line -- only a line running through the center is a crosshair.
+        ax, ay = x1 - insert.cx, y1 - insert.cy
+        dist = abs(ax * dy - ay * dx) / length
+        if dist > max(3.0, insert.r * 0.01):
+            continue
+        hits.append((int(x1), int(y1), int(x2), int(y2)))
+    return hits
+
+
+def _strip_axis_crosshair(binary: np.ndarray, insert: Circle | None) -> np.ndarray:
+    """Some source diagrams draw a full-length horizontal/vertical centerline
+    ("crosshair") through the insert for orientation. A contact whose ink touches
+    that line gets 8-connected into one oversized blob whose minEnclosingCircle
+    exceeds max_r and is silently dropped by the radius gate below, before
+    circularity is even checked -- confirmed by pixel inspection against a real
+    source (see tools/converter/README.md's real-source findings).
+
+    Fix is deliberately conservative: detect the line explicitly (see
+    `_detect_axis_lines` -- long, thin, axis-aligned, centered on the already-known
+    insert), then within a thin band around only those detected segments, erase a
+    pixel only if it does NOT survive a local morphological opening (i.e. it's
+    thin/line-only). A thick contact's own ink -- filled disc or ring stroke --
+    survives the opening and is left untouched; only the connecting line ink is
+    cut. When no qualifying line is found (e.g. every current synthetic fixture,
+    which doesn't draw one), this is a strict no-op.
+    """
+    if insert is None:
+        return binary
+    segments = _detect_axis_lines(binary, insert)
+    if not segments:
+        return binary
+    h, w = binary.shape[:2]
+    axis_mask = np.zeros((h, w), dtype=np.uint8)
+    for x1, y1, x2, y2 in segments:
+        cv2.line(axis_mask, (x1, y1), (x2, y2), 255, thickness=5)
+    k = max(3, round(min(h, w) / 150))
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))
+    opened = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
+    out = binary.copy()
+    out[(axis_mask > 0) & (opened == 0)] = 0
+    return out
+
+
 def detect_contact_circles(
     gray: np.ndarray,
     insert: Circle | None,
@@ -116,13 +195,14 @@ def detect_contact_circles(
     # Contour-based pass: primary source of contact candidates, filtered by shape
     # (isoperimetric circularity) so glyph loops don't qualify.
     binary = _binarize(gray)
+    contour_source = _strip_axis_crosshair(binary, insert)
     # RETR_CCOMP gives 2-level hierarchy (outer boundaries + holes), which lets us
     # reject a common false positive: the enclosed counter of a rounded letterform
     # (e.g. 'B', 'D', 'P', 'R', 'O') is itself near-circular, but it is a *hole inside
     # a non-circular parent* (the glyph's outer stroke). A genuine hollow contact ring
     # is the opposite: its hole's parent (the ring's outer edge) is ALSO circular. So a
     # hole candidate is only accepted if it has no parent, or its parent is circular too.
-    contours, hierarchy = cv2.findContours(binary, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(contour_source, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
     hierarchy = hierarchy[0] if hierarchy is not None else []
 
     def _isoperimetric_circularity(contour) -> float:

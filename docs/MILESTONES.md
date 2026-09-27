@@ -27,10 +27,15 @@
 - **Done:** Lighthouse installable; airplane mode → всё работает; экран не гаснет в Viewer.
 
 ## M4 — Converter prototype (5–10 реальных images) ◐
-- Python venv, OpenCV, PyMuPDF; round-trip тест на synthetic (render → raster → recognize) — 14/14 зелёных.
-- **7 реальных источников прогнаны** (F11, G11, F28, D19, J19, H53, H55 — все filled-style, deralconnectors.com): recall 100% (F11/G11) до 63% (D19/J19). Найден и подтверждён **root cause** главного провала — contacts точно на осевых crosshair-линиях сливаются с линией в один blob и отсекаются по радиусу до проверки circularity. Один точечный фикс (garbage text-box баг) внесён и подтверждён; попытка фикса axis-crossing **откачена** — ломала hollow-style synthetic fixtures (нет ещё реального hollow-source для валидации). Подробности и метрики: [tools/converter/README.md](../tools/converter/README.md).
-- **Остаётся:** правильный fix для axis-crossing (Hough line detection + local morphology, не blanket erase), OCR/AI reader для labels (сейчас NullReader — placeholder `#N`), хотя бы один реальный hollow-style источник.
-- **Done:** метрики из CONVERTER_REQUIREMENTS на 7 images — получено; решение о роли AI — pending (labels ещё не читаются).
+- Python venv, OpenCV, PyMuPDF; round-trip тест на synthetic — 27/27 зелёных (incl. 3 новых regression-теста на axis-crosshair баг).
+- **7 реальных источников** (F11, G11, F28, D19, J19, H53, H55 — все filled-style, deralconnectors.com). Два реальных бага найдены и исправлены:
+  1. garbage text-box (цепной merge glyph-боксов давал огромную мусорную label-плашку);
+  2. **axis-crosshair**: contacts на осевых линиях сливались с линией и отсекались по радиусу. Точный root cause подтверждён по пикселям; фикс через явную детекцию линии (`HoughLinesP`, центр + угол) + локальный morphology survive-test (не blanket erase — та версия ломала hollow-style synthetic и была откачена).
+  - **Recall (агрегат по 7):** 78% → 86% (153/196 → 169/196). F28 24→28/28 (100%), H53 41→46/53, H55 42→48/55, J19 12→13/19. D19 (12/19) — не исправлен: там осевые contacts стоят слишком плотно, фрагменты линии между ними короче любого разумного `minLineLength` (задокументировано, разбирался quй подход не сработал).
+- **AI vision reader (`--reader ai`, Claude API)** подключён: batched (1 запрос на весь arrangement), response-parsing покрыт unit-тестами на fake-клиенте (10 тестов). **Не проверен на реальном API-вызове** — нужен `ANTHROPIC_API_KEY` от admin (сознательно не запрашивался/не вводился агентом — секрет пользователя).
+- Подробности и метрики: [tools/converter/README.md](../tools/converter/README.md).
+- **Остаётся:** прогнать `--reader ai` с реальным ключом и измерить точность; D19-кластер; хотя бы один реальный hollow-style источник.
+- **Done:** метрики на 7 images — получено; AI reader подключён, точность — pending реального прогона.
 
 ## M5 — QA tool ☑
 - Локальный web UI (`npm run qa`, http://localhost:4550): Original | Generated SVG | Overlay (opacity sliders), errors/warnings, confidence.

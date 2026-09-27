@@ -127,58 +127,64 @@ find real failure modes ahead of M4's 5→10-15→50 dataset. All 7 are flat sol
 contacts (`style: "filled"`), no OCR attempted (NullReader; labels are placeholder
 `#N` and don't count toward recall here -- only geometry/count).
 
-| Source | Expected | Detected | Recall |
+| Source | Expected | Detected (before fix) | Detected (after fix) |
 |---|---|---|---|
-| F11 | 11 | 11 | 100% |
-| G11 | 11 | 11 | 100% |
-| F28 | 28 | 24 | 86% |
-| D19 | 19 | 12 | 63% |
-| J19 | 19 | 12 | 63% |
-| H53 | 53 | 41 | 77% |
-| H55 | 55 | 42 | 76% |
+| F11 | 11 | 11 (100%) | 11 (100%) |
+| G11 | 11 | 11 (100%) | 11 (100%) |
+| F28 | 28 | 24 (86%) | **28 (100%)** |
+| D19 | 19 | 12 (63%) | 12 (63%) -- unchanged, see below |
+| J19 | 19 | 12 (63%) | 13 (68%) |
+| H53 | 53 | 41 (77%) | **46 (87%)** |
+| H55 | 55 | 42 (76%) | **48 (87%)** |
 
-**Root cause found for the D19/J19/H53/H55 shortfall, confirmed by pixel inspection
-(not just inferred):** these diagrams draw a full-length horizontal + vertical
-centerline ("crosshair") through the insert for orientation. Every missed contact
-sits exactly on that crosshair (e.g. D19's dead-center "V", and the entire
-K/U/R/D horizontal row; cropping the source around those coordinates shows the
-line's ink running straight through and past the contact's disc in all 4
-directions). Because contour extraction is 8-connected, each on-axis contact's ink
-merges with the line into one blob whose `minEnclosingCircle` radius balloons far
-past `max_r_frac` -- it's dropped by the radius gate before circularity is even
-checked. F11/G11 have a crosshair too but no contact happens to sit exactly on it,
-hence their clean 100%. F28's center contact ("e") is large enough / the line
-apparently doesn't reach it in the same way -- its 4 misses are a different,
-smaller-magnitude effect (plausibly touching label ink, as originally guessed).
+Aggregate: 153/196 (78%) -> 169/196 (86%).
 
-**A fix was attempted and reverted.** Blanking a thin band along the crosshair
-(through the already-known `insert.cx/cy`) before contour extraction does sever the
-bridge and is safe for *filled* on-axis contacts (a thin scratch through solid ink
-doesn't change the outer boundary) -- but it also cuts a real gap through a *hollow*
-ring's stroke wherever the ring crosses the axis, which regressed the synthetic
-fixture suite (whose hollow-style fixtures include a deliberate dead-center contact,
-same as F28's "e"/H55's "HH"). Reverted rather than ship a fix that trades one
-recall bug for another, since this codebase has no hollow-style real samples yet to
-validate against. The direction that avoids the tradeoff: detect the crosshair
-explicitly (e.g. `HoughLinesP` for a long thin line through the insert center) and
-erase *only* pixels that are line-only by local morphology (survive-opening test)
-rather than a blanket band -- sketched but not implemented; worth doing once a
-hollow-style real sample exists to validate against, not just synthetic ones.
+**Root cause (confirmed by pixel inspection, not just inferred):** these diagrams
+draw a full-length horizontal + vertical centerline ("crosshair") through the
+insert for orientation. A contact sitting exactly on that line gets its ink
+8-connected to the line; the merged blob's `minEnclosingCircle` balloons past
+`max_r_frac` and is dropped by the radius gate before circularity is even checked.
+F11/G11 have a crosshair too but no contact happens to sit exactly on it, hence
+their clean 100% even before the fix.
+
+**Fix (`_strip_axis_crosshair`/`_detect_axis_lines` in `geometry.py`):** explicitly
+detect long, thin, axis-aligned line segments whose infinite extension passes
+through the already-known insert center (`HoughLinesP`, filtered by angle +
+center-distance), then -- only within a thin band around those specific detected
+segments -- erase a pixel if it does **not** survive a local morphological opening
+(i.e. it's line-only). A thick contact's own ink (filled disc or ring stroke)
+survives the opening and is left untouched; a no-op when no qualifying line is
+found (every current synthetic fixture, which draws no crosshair -- confirmed by
+`tests/test_axis_crosshair.py::test_no_crosshair_is_unaffected` and by the
+unchanged synthetic-suite metrics above). This is safer than an earlier attempt
+that blanked a full-width/height band regardless of content, which fixed the same
+real cases but broke hollow-style synthetic fixtures with a dead-center contact
+(reverted; superseded by this version).
+
+**D19 remains unfixed -- known, understood gap.** Its on-axis contacts (K/U/V/R/D)
+are packed close enough together that the crosshair fragments *between* them are
+individually shorter than any reasonable `minLineLength`, so they're never detected
+as qualifying lines and the blob merge still happens for that cluster. A much
+shorter `minLineLength` was tried to catch this, relying only on the strict
+center-distance filter for precision -- it measurably *hurt* H53/H55 (loosened
+segments picked up collateral false positives elsewhere) while still not fixing
+D19, so it was reverted in favor of the current, better-aggregate-score parameters.
+Resolving D19-like clusters needs a different signal than segment length (e.g.
+reconstructing the axis from many short colinear fragments via a Hough accumulator
+peak rather than per-segment length, or a second morphological pass keyed to the
+confirmed contact-size cluster once a first pass has established it).
 
 No crashes, no garbage output on any of the 7 -- pipeline is structurally ready for
-real sources; the open gap is this one well-understood geometry case plus the
-not-yet-implemented label reader, not the overall architecture.
+real sources; open gaps are this one geometry edge case, the not-yet-measured label
+reader (see below), and needing a real hollow-style sample, not the architecture.
 
 ## Known weaknesses
 
-- **On-axis contacts (sitting exactly on a drawn centerline/crosshair) are often
-  missed.** Root cause confirmed (see above): the line's ink merges with the
-  contact's via 8-connectivity, and the combined blob is rejected by the max-radius
-  gate. This is the single largest recall gap found so far (accounts for most of
-  the D19/J19/H53/H55 misses above). Fixing it safely for both filled and hollow
-  contact styles needs the crosshair to be detected and stripped explicitly
-  (`HoughLinesP` + local morphological survive-opening), not a blanket band erase --
-  see above for why the naive version was reverted.
+- **On-axis contacts in a tightly-packed cluster (D19-like) are still missed.**
+  Fixed for isolated/moderately-spaced on-axis contacts (see above); the remaining
+  case is contacts close enough together that the crosshair fragment *between* them
+  is too short to register as a detected line. Not yet resolved -- see above for
+  what was tried and why.
 - **Circular keying marks are structurally ambiguous.** A filled circular keying dot
   close in size to real contacts cannot be distinguished from a contact by shape or
   size alone -- this is the one remaining synthetic false positive (B99). Resolving
@@ -214,13 +220,12 @@ not-yet-implemented label reader, not the overall architecture.
 ## What's needed from real sources (per CONVERTER_REQUIREMENTS.md's 5 -> 10-15 -> 50
 development strategy)
 
-1. A properly implemented crosshair-strip fix (Hough line detection + local
-   morphological survive-opening, see above), validated against **both** a filled
-   and a hollow-style real sample -- this is now the single highest-value fix
-   (largest measured recall gap, root cause already confirmed).
+1. Resolving the D19-like tightly-clustered on-axis case (see above) -- the
+   isolated/moderately-spaced case is fixed and measured.
 2. At least one real *hollow*-style source (all 7 samples so far are filled-dot
-   style from one catalog website) to validate the above fix and check whether the
-   hierarchy/circularity thresholds tuned on synthetic hollow fixtures hold up.
+   style from one catalog website) to check whether the axis-crosshair fix and the
+   hierarchy/circularity thresholds (tuned against synthetic hollow fixtures) hold
+   up against a real hollow-ring drawing convention.
 3. More real images spanning different manufacturers/drafting conventions, to see
    failure patterns beyond one website's style.
 4. A decision on the keying-mark ambiguity: is there a reliable geometric prior
