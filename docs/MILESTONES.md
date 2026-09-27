@@ -26,11 +26,11 @@
 - Wake Lock hook с re-acquire.
 - **Done:** Lighthouse installable; airplane mode → всё работает; экран не гаснет в Viewer.
 
-## M4 — Converter prototype (5–10 реальных images) ☐
-- Python venv, OpenCV, PyMuPDF; OCR/AI для labels.
-- Round-trip тест на synthetic (render → raster → recognize).
-- **Блокер:** нужны реальные source images от admin.
-- **Done:** метрики из CONVERTER_REQUIREMENTS на 5–10 images, решение о роли AI.
+## M4 — Converter prototype (5–10 реальных images) ◐
+- Python venv, OpenCV, PyMuPDF; round-trip тест на synthetic (render → raster → recognize) — 14/14 зелёных.
+- **7 реальных источников прогнаны** (F11, G11, F28, D19, J19, H53, H55 — все filled-style, deralconnectors.com): recall 100% (F11/G11) до 63% (D19/J19). Найден и подтверждён **root cause** главного провала — contacts точно на осевых crosshair-линиях сливаются с линией в один blob и отсекаются по радиусу до проверки circularity. Один точечный фикс (garbage text-box баг) внесён и подтверждён; попытка фикса axis-crossing **откачена** — ломала hollow-style synthetic fixtures (нет ещё реального hollow-source для валидации). Подробности и метрики: [tools/converter/README.md](../tools/converter/README.md).
+- **Остаётся:** правильный fix для axis-crossing (Hough line detection + local morphology, не blanket erase), OCR/AI reader для labels (сейчас NullReader — placeholder `#N`), хотя бы один реальный hollow-style источник.
+- **Done:** метрики из CONVERTER_REQUIREMENTS на 7 images — получено; решение о роли AI — pending (labels ещё не читаются).
 
 ## M5 — QA tool ☑
 - Локальный web UI (`npm run qa`, http://localhost:4550): Original | Generated SVG | Overlay (opacity sliders), errors/warnings, confidence.

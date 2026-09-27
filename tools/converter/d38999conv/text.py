@@ -184,6 +184,16 @@ def detect_label_boxes(
             merged_boxes.append(cur)
         boxes = merged_boxes
 
+    # The merge above is a transitive proximity closure: if A is close to B and B is
+    # close to C, all three merge into one box even when A and C are far apart (e.g.
+    # a chain of glyphs bridging a real label into unrelated ink elsewhere on the
+    # page, such as a caption line below the diagram). A single connector label is
+    # never more than a few characters, so any merged box wildly taller/wider than a
+    # single glyph is not a label -- drop it rather than feed a garbage-sized text
+    # placement downstream.
+    max_dim = median_h * 6
+    boxes = [b for b in boxes if (b[2] - b[0]) <= max_dim and (b[3] - b[1]) <= max_dim]
+
     return [LabelBox(x0=int(b[0]), y0=int(b[1]), x1=int(b[2]), y1=int(b[3])) for b in boxes]
 
 

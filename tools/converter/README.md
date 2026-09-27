@@ -99,33 +99,65 @@ Run on A98 and B97: recall = precision = 1.000 and mean center error stayed
 + contour fit is robust to these particular degradations at this scale/line-weight.
 This is expected to be optimistic vs. real scans/photos (see below).
 
-## Real source: qualitative look (F28.png, deralconnectors.com catalog screenshot)
+## Real sources: quantitative look (7 samples, deralconnectors.com catalog screenshots)
 
-Not used for pass/fail metrics (too small an n, and not blessed as a benchmark yet),
-but ran the adapter + geometry stage against it to gauge real-world behavior ahead of
-M4:
+Not a blessed benchmark (small n, single source website/style), but real enough to
+find real failure modes ahead of M4's 5→10-15→50 dataset. All 7 are flat solid-color
+contacts (`style: "filled"`), no OCR attempted (NullReader; labels are placeholder
+`#N` and don't count toward recall here -- only geometry/count).
 
-- Canvas came in as 1080x2424 (a tall webpage screenshot, not tightly cropped to the
-  diagram) -- adapter handled this fine, no assumptions about aspect ratio.
-- Insert circle detected cleanly: `cx=527, cy=1265, r=510`.
-- Contacts: 24 detected vs. `expectedContacts: 28` (recall ~86%). Correctly split
-  into two radius clusters (22 @ r~34, 2 @ r~46), which does track the sidecar note
-  of "2x #16, 26x #20" contacts (2 larger + a majority of smaller) though the
-  detected size ratio (~0.74) is shallower than the "2x diameter" described --
-  worth revisiting with a real second sample.
-- Recall is visibly lower here (86%) than on clean synthetic (100%). Contact rings
-  in a real screenshot have JPEG/anti-aliasing noise and touching label ink that
-  clean OpenCV-drawn synthetic circles don't reproduce; the missing 4 are plausibly
-  contacts whose ring fused with adjacent label ink strongly enough that even the
-  touching-ink rescue pass (calibrated against a confirmed-cluster radius) didn't
-  recover them, or whose ring circularity fell below the 0.85 threshold from
-  compression artifacts.
-- No crash, no garbage output -- pipeline is structurally ready for real sources;
-  the main gap is precision/recall tuning against a larger real sample, not
-  architecture.
+| Source | Expected | Detected | Recall |
+|---|---|---|---|
+| F11 | 11 | 11 | 100% |
+| G11 | 11 | 11 | 100% |
+| F28 | 28 | 24 | 86% |
+| D19 | 19 | 12 | 63% |
+| J19 | 19 | 12 | 63% |
+| H53 | 53 | 41 | 77% |
+| H55 | 55 | 42 | 76% |
+
+**Root cause found for the D19/J19/H53/H55 shortfall, confirmed by pixel inspection
+(not just inferred):** these diagrams draw a full-length horizontal + vertical
+centerline ("crosshair") through the insert for orientation. Every missed contact
+sits exactly on that crosshair (e.g. D19's dead-center "V", and the entire
+K/U/R/D horizontal row; cropping the source around those coordinates shows the
+line's ink running straight through and past the contact's disc in all 4
+directions). Because contour extraction is 8-connected, each on-axis contact's ink
+merges with the line into one blob whose `minEnclosingCircle` radius balloons far
+past `max_r_frac` -- it's dropped by the radius gate before circularity is even
+checked. F11/G11 have a crosshair too but no contact happens to sit exactly on it,
+hence their clean 100%. F28's center contact ("e") is large enough / the line
+apparently doesn't reach it in the same way -- its 4 misses are a different,
+smaller-magnitude effect (plausibly touching label ink, as originally guessed).
+
+**A fix was attempted and reverted.** Blanking a thin band along the crosshair
+(through the already-known `insert.cx/cy`) before contour extraction does sever the
+bridge and is safe for *filled* on-axis contacts (a thin scratch through solid ink
+doesn't change the outer boundary) -- but it also cuts a real gap through a *hollow*
+ring's stroke wherever the ring crosses the axis, which regressed the synthetic
+fixture suite (whose hollow-style fixtures include a deliberate dead-center contact,
+same as F28's "e"/H55's "HH"). Reverted rather than ship a fix that trades one
+recall bug for another, since this codebase has no hollow-style real samples yet to
+validate against. The direction that avoids the tradeoff: detect the crosshair
+explicitly (e.g. `HoughLinesP` for a long thin line through the insert center) and
+erase *only* pixels that are line-only by local morphology (survive-opening test)
+rather than a blanket band -- sketched but not implemented; worth doing once a
+hollow-style real sample exists to validate against, not just synthetic ones.
+
+No crashes, no garbage output on any of the 7 -- pipeline is structurally ready for
+real sources; the open gap is this one well-understood geometry case plus the
+not-yet-implemented label reader, not the overall architecture.
 
 ## Known weaknesses
 
+- **On-axis contacts (sitting exactly on a drawn centerline/crosshair) are often
+  missed.** Root cause confirmed (see above): the line's ink merges with the
+  contact's via 8-connectivity, and the combined blob is rejected by the max-radius
+  gate. This is the single largest recall gap found so far (accounts for most of
+  the D19/J19/H53/H55 misses above). Fixing it safely for both filled and hollow
+  contact styles needs the crosshair to be detected and stripped explicitly
+  (`HoughLinesP` + local morphological survive-opening), not a blanket band erase --
+  see above for why the naive version was reverted.
 - **Circular keying marks are structurally ambiguous.** A filled circular keying dot
   close in size to real contacts cannot be distinguished from a contact by shape or
   size alone -- this is the one remaining synthetic false positive (B99). Resolving
@@ -158,11 +190,18 @@ M4:
 ## What's needed from real sources (per CONVERTER_REQUIREMENTS.md's 5 -> 10-15 -> 50
 development strategy)
 
-1. 5-15 more real images (screenshots/scans/PDFs) spanning different manufacturers,
-   to see recurring failure patterns beyond the single F28.png sample.
-2. A decision on the keying-mark ambiguity: is there a reliable geometric prior
+1. A properly implemented crosshair-strip fix (Hough line detection + local
+   morphological survive-opening, see above), validated against **both** a filled
+   and a hollow-style real sample -- this is now the single highest-value fix
+   (largest measured recall gap, root cause already confirmed).
+2. At least one real *hollow*-style source (all 7 samples so far are filled-dot
+   style from one catalog website) to validate the above fix and check whether the
+   hierarchy/circularity thresholds tuned on synthetic hollow fixtures hold up.
+3. More real images spanning different manufacturers/drafting conventions, to see
+   failure patterns beyond one website's style.
+4. A decision on the keying-mark ambiguity: is there a reliable geometric prior
    (position relative to insert boundary, distinctive shape like a D-notch instead
    of a plain circle) that generalizes across sources?
-3. A real OCR/AI-vision reader wired into `LabelReader` and measured for character
+5. A real OCR/AI-vision reader wired into `LabelReader` and measured for character
    accuracy on actual connector-diagram fonts -- this cannot be assessed on synthetic
    `putText` labels.
