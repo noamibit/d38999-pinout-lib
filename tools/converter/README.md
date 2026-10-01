@@ -208,30 +208,50 @@ total across the batch. No per-image ground truth was collected for this batch
 (50 images is too many to hand-transcribe), so this is a volume/stability check,
 not a recall measurement -- except for the one case below, confirmed by eye.
 
-**New, unfixed finding: touching/overlapping contacts merge into one blob.**
-`G41.png`'s caption reads "41 # 20" and visibly shows 41 contacts in tightly
-packed concentric rings where adjacent dots touch or nearly touch -- the
-converter found **1**. Confirmed by contour inspection: the second-largest
-contour in the image (area 107954, second only to the insert boundary itself) is
-almost certainly most of those 41 dots fused into a single connected blob via
-8-connectivity, which fails circularity outright and is dropped as a whole. This
-is a different failure mode from the axis-crosshair one above (which merges a
-contact with a thin *line*; this merges contacts with *each other* directly) and
-is likely to affect any sufficiently dense/high-pin-count real arrangement in
-this style, not just G41. Not attempted yet -- the standard fix for
-touching-blob separation is distance-transform + watershed segmentation, which
-is a real, separate, non-trivial unit of work (and risks the same kind of
-regression-elsewhere tradeoffs seen with the axis-crosshair fix if done
-carelessly), not a quick patch. This is now the single highest-value remaining
-geometry gap -- see "What's needed" below.
+**New, unfixed finding: densely-ringed contacts lose circularity to thin guide
+lines and are mostly dropped.** `G41.png`'s caption reads "41 # 20" and shows 41
+contacts arranged in tightly packed concentric rings -- the converter found **1**.
+Initial hypothesis (adjacent dots directly fused into one 8-connected blob, the
+classic "touching coins" problem) turned out to be wrong on closer inspection:
+most of the 41 dots are individually-sized correctly (area ~375-380px^2, matching
+the one that *did* pass on its own) but sit on a thin *curved* construction line
+-- concentric guide rings connecting each ring's contacts, the same underlying
+mechanism as the straight-line axis-crosshair case above, just circular instead
+of straight. The guide line's thin tail both ragged-ens the boundary (isoperimetric
+circularity measured as low as 0.1-0.3 on real contours) **and**, unlike initially
+assumed, measurably inflates `minEnclosingCircle`'s radius (up to 3x the true
+~11.5px radius) wherever the tail extends further before being clipped by the
+local contour -- so radius-based matching against a confirmed-size cluster (the
+same rescue mechanism that already recovers axis-crosshair and touching-label
+cases) only catches a fraction of them.
+
+**A broader circularity-based rescue was attempted and reverted.** Lowering the
+hard circularity cutoff and rescuing low-circularity candidates whose radius
+roughly matches a confirmed cluster recovered 6 of G41's 41 (1 -> 6) -- real but
+modest progress -- while also introducing a new, confirmed false-positive class:
+a round-ish label glyph (tested case: the letter "D") can have isoperimetric
+circularity in the same 0.78-0.85 range as a tailed contact and a similar
+enclosing radius, so it got rescued as a spurious contact, regressing a synthetic
+fixture that was previously perfect precision (C98: 28/28 -> 29 detected). An
+area/(pi*r^2) "fullness" check was tried as a second discriminator to tell a
+disc-with-thin-tail apart from a non-disc letter shape, but it doesn't cleanly
+separate them either -- many genuine tailed G41 dots measured a *low* fullness
+ratio too (as low as 0.09-0.19) once their enclosing radius was tail-inflated,
+overlapping the letter glyph's range. Given the gain was partial and the
+regression was on a previously-perfect case, this was reverted rather than
+shipped as a net-worse tradeoff; geometry.py is unchanged from the insert-circle
+fix above. This is now the best-understood remaining geometry gap -- see "What's
+needed" below for what a real fix needs to distinguish.
 
 ## Known weaknesses
 
-- **Touching/overlapping contacts merge into one undifferentiated blob and are
-  almost entirely lost.** Found on a dense real arrangement (G41: 41 contacts in
-  tightly packed concentric rings, 1 detected) -- adjacent filled dots 8-connect
-  into a single large contour that fails circularity outright. Needs
-  distance-transform + watershed (or similar) blob-splitting; not attempted yet.
+- **Densely-ringed contacts on thin curved guide lines are mostly lost.** Found
+  on a dense real arrangement (G41: 41 contacts in tightly packed concentric
+  rings, 1 detected -- 6 with a broader rescue that was tried and reverted for
+  introducing a label-glyph false-positive regression elsewhere). Needs a fix
+  that separates a disc-with-thin-tail from a non-disc glyph more reliably than
+  isoperimetric circularity or area-fullness alone -- see the README section
+  above for exactly what was tried and why it wasn't enough on its own.
   See the 50-image batch section above. This is the single largest remaining
   geometry gap.
 - **On-axis contacts in a tightly-packed cluster (D19-like) are still missed.**
@@ -274,10 +294,17 @@ geometry gap -- see "What's needed" below.
 ## What's needed from real sources (per CONVERTER_REQUIREMENTS.md's 5 -> 10-15 -> 50
 development strategy)
 
-1. **Touching/overlapping contact separation** (distance-transform + watershed or
-   similar) -- the highest-value remaining gap, found on the 50-image batch
-   (G41: 41 expected, 1 detected). Likely affects every dense real arrangement in
-   this style, not just G41.
+1. **Densely-ringed contacts on thin curved guide lines** -- the highest-value
+   remaining gap, found on the 50-image batch (G41: 41 expected, 1-6 detected
+   depending on how aggressively rescued). Needs a discriminator that separates
+   a disc-with-thin-tail from a non-disc glyph better than isoperimetric
+   circularity or area-fullness (both tried, both insufficient alone -- see the
+   README section above). A geometric approach worth trying: estimate the
+   *local* radius of curvature along different parts of the boundary (a true
+   disc's boundary curves consistently at ~1/r everywhere; a disc-with-tail has
+   one consistent arc plus a much-lower-curvature tail segment; a letter has
+   neither). Likely affects every dense real arrangement in this style, not
+   just G41.
 2. Resolving the D19-like tightly-clustered on-axis case (see above) -- the
    isolated/moderately-spaced case is fixed and measured.
 3. Per-image ground truth (expected ID -> true contact count, at minimum) for the

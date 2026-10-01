@@ -33,11 +33,11 @@
   1. **insert search range** был слишком узкий (25–50% канвы) — у этой партии больше полей вокруг диаграммы, insert иногда занимал всего ~19%; `B2.png` (реально 2 contacts) находил 0. Расширил до 12%.
   2. **Hough хватал "призрачный" внутренний круг** вместо настоящего insert (плотное кольцо contacts само похоже на круг для Hough) — на `D35.png` находил r=72 вместо настоящих r=164, теряя почти все contacts. Фикс: приоритет contour-by-area (как уже было для contacts), Hough — только fallback.
   - Оба фикса покрыты regression-тестами (`test_insert_detection.py`, synthetic-репродукции обоих failure modes).
-  - **Новая, ещё не исправленная находка:** плотно упакованные contacts (соприкасающиеся кружки) сливаются в один blob и почти полностью теряются — `G41.png` (реально 41 contact) нашёл только 1. Нужен watershed/distance-transform — отдельная, нетривиальная задача, не форсировал. Сейчас это главный оставшийся geometry-гэп.
+  - **Новая находка (пока не исправлена):** плотные concentric-кольца contacts сидят на тонких изогнутых guide-линиях (тот же механизм, что axis-crosshair, только по кривой) — `G41.png` (реально 41 contact) нашёл только 1. **Попробовал фикс** (расширил circularity-rescue + area-fullness дискриминатор) — дал частичное улучшение (1→6 из 41), но завёл новый false-positive: буквоподобные glyph'ы (например "D") стали иногда распознаваться как contacts, что сломало ранее идеальную synthetic-точность (C98 28/28→29). **Откатил** — выигрыш мал, регресс реален. Нужен более точный дискриминатор «диск-с-хвостом vs буква» (идея: locally-varying radius of curvature).
   - Ground truth (expected count) собран только для горстки файлов вручную — для всех 50 не считал (пока это volume/stability-проверка, не recall-метрика).
 - **AI vision reader (`--reader ai`, Claude API)** подключён: batched (1 запрос на весь arrangement), response-parsing покрыт unit-тестами на fake-клиенте (10 тестов). **Не проверен на реальном API-вызове** — нужен `ANTHROPIC_API_KEY` от admin.
 - Подробности и метрики: [tools/converter/README.md](../tools/converter/README.md).
-- **Остаётся:** touching-circles watershed-фикс; прогнать `--reader ai` с реальным ключом; D19-кластер; хотя бы один реальный hollow-style источник.
+- **Остаётся:** правильный discriminator для dense guide-line contacts; прогнать `--reader ai` с реальным ключом; D19-кластер; хотя бы один реальный hollow-style источник.
 - **Done:** метрики на 7+50 images — получено; AI reader подключён, точность — pending реального прогона.
 
 ## M5 — QA tool ☑
