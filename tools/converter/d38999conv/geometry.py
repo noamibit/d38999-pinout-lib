@@ -40,28 +40,32 @@ def _binarize(gray: np.ndarray) -> np.ndarray:
 
 
 def detect_insert_circle(gray: np.ndarray) -> Circle | None:
-    """Detect the single large outer insert circle via Hough, falling back to the
-    largest near-circular contour."""
+    """Detect the single large outer insert circle: primarily the largest
+    sufficiently-circular contour by area, with Hough only as a fallback when no
+    contour qualifies.
+
+    Contour-by-area is primary (not Hough) because a dense ring of contacts near
+    the insert boundary can itself look like a circle to HoughCircles' gradient
+    accumulator -- confirmed on a real source where Hough's top accumulator peak
+    was a smaller false circle (r=72) sitting inside the true insert (r=164,
+    almost the same center), silently swallowing most real contacts by making
+    them register as "outside the insert". The true insert is reliably the
+    single largest circular-ish ink boundary in the frame; a dense contact ring's
+    phantom "circle" is never larger in area than the insert it sits inside.
+
+    The search range is a fraction of the shorter canvas dimension, which assumes
+    the insert takes up a fairly consistent share of the frame. That assumption
+    breaks across differently-cropped source sets: one real batch measured
+    insert_r/min(w,h) from 0.189 (generous margin + caption below the diagram) up
+    to 0.398 (tight crop) across the same site's exports -- 0.25 as a lower bound
+    silently excluded several real arrangements entirely. Kept wide (0.12) rather
+    than re-narrowed per-batch, since a new source set's crop style is not known
+    in advance.
+    """
     h, w = gray.shape[:2]
-    blurred = _preprocess(gray)
-    min_r = int(min(h, w) * 0.25)
+    min_r = int(min(h, w) * 0.12)
     max_r = int(min(h, w) * 0.5)
 
-    circles = cv2.HoughCircles(
-        blurred,
-        cv2.HOUGH_GRADIENT,
-        dp=1.5,
-        minDist=max(h, w),
-        param1=80,
-        param2=60,
-        minRadius=min_r,
-        maxRadius=max_r,
-    )
-    if circles is not None:
-        cx, cy, r = circles[0][0]
-        return Circle(cx=float(cx), cy=float(cy), r=float(r))
-
-    # Fallback: largest near-circular contour.
     binary = _binarize(gray)
     contours, _ = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     best = None
@@ -79,7 +83,25 @@ def detect_insert_circle(gray: np.ndarray) -> Circle | None:
         if area > best_area:
             best_area = area
             best = Circle(cx=float(cx), cy=float(cy), r=float(r))
-    return best
+    if best is not None:
+        return best
+
+    # Fallback: Hough, only reached if no contour qualified above.
+    blurred = _preprocess(gray)
+    circles = cv2.HoughCircles(
+        blurred,
+        cv2.HOUGH_GRADIENT,
+        dp=1.5,
+        minDist=max(h, w),
+        param1=80,
+        param2=60,
+        minRadius=min_r,
+        maxRadius=max_r,
+    )
+    if circles is not None:
+        cx, cy, r = circles[0][0]
+        return Circle(cx=float(cx), cy=float(cy), r=float(r))
+    return None
 
 
 def _detect_axis_lines(binary: np.ndarray, insert: Circle, angle_tol_deg: float = 3.0) -> list[tuple[int, int, int, int]]:

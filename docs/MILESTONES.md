@@ -27,15 +27,18 @@
 - **Done:** Lighthouse installable; airplane mode → всё работает; экран не гаснет в Viewer.
 
 ## M4 — Converter prototype (5–10 реальных images) ◐
-- Python venv, OpenCV, PyMuPDF; round-trip тест на synthetic — 27/27 зелёных (incl. 3 новых regression-теста на axis-crosshair баг).
-- **7 реальных источников** (F11, G11, F28, D19, J19, H53, H55 — все filled-style, deralconnectors.com). Два реальных бага найдены и исправлены:
-  1. garbage text-box (цепной merge glyph-боксов давал огромную мусорную label-плашку);
-  2. **axis-crosshair**: contacts на осевых линиях сливались с линией и отсекались по радиусу. Точный root cause подтверждён по пикселям; фикс через явную детекцию линии (`HoughLinesP`, центр + угол) + локальный morphology survive-test (не blanket erase — та версия ломала hollow-style synthetic и была откачена).
-  - **Recall (агрегат по 7):** 78% → 86% (153/196 → 169/196). F28 24→28/28 (100%), H53 41→46/53, H55 42→48/55, J19 12→13/19. D19 (12/19) — не исправлен: там осевые contacts стоят слишком плотно, фрагменты линии между ними короче любого разумного `minLineLength` (задокументировано, разбирался quй подход не сработал).
-- **AI vision reader (`--reader ai`, Claude API)** подключён: batched (1 запрос на весь arrangement), response-parsing покрыт unit-тестами на fake-клиенте (10 тестов). **Не проверен на реальном API-вызове** — нужен `ANTHROPIC_API_KEY` от admin (сознательно не запрашивался/не вводился агентом — секрет пользователя).
+- Python venv, OpenCV, PyMuPDF; round-trip тест на synthetic — 29/29 зелёных.
+- **Первая партия, 7 источников** (F11, G11, F28, D19, J19, H53, H55, deralconnectors.com). Два бага найдены и исправлены: garbage text-box (цепной merge glyph-боксов) и **axis-crosshair** (contacts на осевых линиях сливались с линией — фикс через `HoughLinesP` + локальный morphology survive-test). Recall (агрегат по 7): 78% → 86%. D19-кластер (слишком плотные осевые contacts) не исправлен, задокументирован.
+- **Вторая партия, 50 источников** (от пользователя, тот же сайт, более качественные кропы — заменили первые 7). Batch прошёл 50/50 без крашей, 1205 contacts найдено суммарно. Ещё два реальных бага найдены и исправлены:
+  1. **insert search range** был слишком узкий (25–50% канвы) — у этой партии больше полей вокруг диаграммы, insert иногда занимал всего ~19%; `B2.png` (реально 2 contacts) находил 0. Расширил до 12%.
+  2. **Hough хватал "призрачный" внутренний круг** вместо настоящего insert (плотное кольцо contacts само похоже на круг для Hough) — на `D35.png` находил r=72 вместо настоящих r=164, теряя почти все contacts. Фикс: приоритет contour-by-area (как уже было для contacts), Hough — только fallback.
+  - Оба фикса покрыты regression-тестами (`test_insert_detection.py`, synthetic-репродукции обоих failure modes).
+  - **Новая, ещё не исправленная находка:** плотно упакованные contacts (соприкасающиеся кружки) сливаются в один blob и почти полностью теряются — `G41.png` (реально 41 contact) нашёл только 1. Нужен watershed/distance-transform — отдельная, нетривиальная задача, не форсировал. Сейчас это главный оставшийся geometry-гэп.
+  - Ground truth (expected count) собран только для горстки файлов вручную — для всех 50 не считал (пока это volume/stability-проверка, не recall-метрика).
+- **AI vision reader (`--reader ai`, Claude API)** подключён: batched (1 запрос на весь arrangement), response-parsing покрыт unit-тестами на fake-клиенте (10 тестов). **Не проверен на реальном API-вызове** — нужен `ANTHROPIC_API_KEY` от admin.
 - Подробности и метрики: [tools/converter/README.md](../tools/converter/README.md).
-- **Остаётся:** прогнать `--reader ai` с реальным ключом и измерить точность; D19-кластер; хотя бы один реальный hollow-style источник.
-- **Done:** метрики на 7 images — получено; AI reader подключён, точность — pending реального прогона.
+- **Остаётся:** touching-circles watershed-фикс; прогнать `--reader ai` с реальным ключом; D19-кластер; хотя бы один реальный hollow-style источник.
+- **Done:** метрики на 7+50 images — получено; AI reader подключён, точность — pending реального прогона.
 
 ## M5 — QA tool ☑
 - Локальный web UI (`npm run qa`, http://localhost:4550): Original | Generated SVG | Overlay (opacity sliders), errors/warnings, confidence.

@@ -178,8 +178,62 @@ No crashes, no garbage output on any of the 7 -- pipeline is structurally ready 
 real sources; open gaps are this one geometry edge case, the not-yet-measured label
 reader (see below), and needing a real hollow-style sample, not the architecture.
 
+## Real sources: 50-image batch (same site, user-supplied set, no ground truth yet)
+
+A much larger real batch (50 images, filled-dot style, same source site as above --
+this set replaced the earlier 7, which were lower-quality full-page screenshots of
+the same arrangements) immediately surfaced two more real bugs, both now fixed:
+
+1. **Insert-circle search range too narrow.** `detect_insert_circle` assumed the
+   insert occupies 25-50% of the shorter canvas dimension. This batch's exports
+   have more margin + a caption below the diagram, so insert_r/min(w,h) measured
+   as low as 0.189 on some files -- below the old 0.25 floor. Below floor means
+   `detect_insert_circle` returns `None`, which silently fails *everything*
+   downstream for that file (confirmed: `B2.png`, a real 2-contact arrangement,
+   detected **0** contacts before this fix). Floor lowered to 0.12.
+2. **Hough picked a phantom inner circle over the true insert.** Even within
+   range, `detect_insert_circle` trusted Hough's top accumulator peak without
+   question. On `D35.png`, a dense ring of contacts near the center registered as
+   a smaller, stronger-scoring "circle" to Hough (r=72) than the true insert
+   boundary (r=164, nearly the same center) -- silently rejecting most real
+   contacts as "outside the insert" (33 real contacts collapsed to effectively
+   nothing useful). Fixed by making the largest sufficiently-circular *contour*
+   (by measured area) primary, with Hough only as a fallback when no contour
+   qualifies -- same "contour primary, Hough corroborating" principle
+   `detect_contact_circles` already used. Both fixes are covered by
+   `tests/test_insert_detection.py` (synthetic repros of each failure mode).
+
+After both fixes: all 50 process without crashing, 1205 contacts detected in
+total across the batch. No per-image ground truth was collected for this batch
+(50 images is too many to hand-transcribe), so this is a volume/stability check,
+not a recall measurement -- except for the one case below, confirmed by eye.
+
+**New, unfixed finding: touching/overlapping contacts merge into one blob.**
+`G41.png`'s caption reads "41 # 20" and visibly shows 41 contacts in tightly
+packed concentric rings where adjacent dots touch or nearly touch -- the
+converter found **1**. Confirmed by contour inspection: the second-largest
+contour in the image (area 107954, second only to the insert boundary itself) is
+almost certainly most of those 41 dots fused into a single connected blob via
+8-connectivity, which fails circularity outright and is dropped as a whole. This
+is a different failure mode from the axis-crosshair one above (which merges a
+contact with a thin *line*; this merges contacts with *each other* directly) and
+is likely to affect any sufficiently dense/high-pin-count real arrangement in
+this style, not just G41. Not attempted yet -- the standard fix for
+touching-blob separation is distance-transform + watershed segmentation, which
+is a real, separate, non-trivial unit of work (and risks the same kind of
+regression-elsewhere tradeoffs seen with the axis-crosshair fix if done
+carelessly), not a quick patch. This is now the single highest-value remaining
+geometry gap -- see "What's needed" below.
+
 ## Known weaknesses
 
+- **Touching/overlapping contacts merge into one undifferentiated blob and are
+  almost entirely lost.** Found on a dense real arrangement (G41: 41 contacts in
+  tightly packed concentric rings, 1 detected) -- adjacent filled dots 8-connect
+  into a single large contour that fails circularity outright. Needs
+  distance-transform + watershed (or similar) blob-splitting; not attempted yet.
+  See the 50-image batch section above. This is the single largest remaining
+  geometry gap.
 - **On-axis contacts in a tightly-packed cluster (D19-like) are still missed.**
   Fixed for isolated/moderately-spaced on-axis contacts (see above); the remaining
   case is contacts close enough together that the crosshair fragment *between* them
@@ -220,17 +274,26 @@ reader (see below), and needing a real hollow-style sample, not the architecture
 ## What's needed from real sources (per CONVERTER_REQUIREMENTS.md's 5 -> 10-15 -> 50
 development strategy)
 
-1. Resolving the D19-like tightly-clustered on-axis case (see above) -- the
+1. **Touching/overlapping contact separation** (distance-transform + watershed or
+   similar) -- the highest-value remaining gap, found on the 50-image batch
+   (G41: 41 expected, 1 detected). Likely affects every dense real arrangement in
+   this style, not just G41.
+2. Resolving the D19-like tightly-clustered on-axis case (see above) -- the
    isolated/moderately-spaced case is fixed and measured.
-2. At least one real *hollow*-style source (all 7 samples so far are filled-dot
+3. Per-image ground truth (expected ID -> true contact count, at minimum) for the
+   50-image batch, so "detected N contacts" becomes a measured recall number
+   instead of a volume/crash check -- 50 is too many to transcribe by hand in one
+   sitting; worth doing incrementally or semi-automating (e.g. OCR'ing each
+   image's own caption text, which states the count, instead of reading contacts).
+4. At least one real *hollow*-style source (every sample so far is filled-dot
    style from one catalog website) to check whether the axis-crosshair fix and the
    hierarchy/circularity thresholds (tuned against synthetic hollow fixtures) hold
    up against a real hollow-ring drawing convention.
-3. More real images spanning different manufacturers/drafting conventions, to see
+5. More real images spanning different manufacturers/drafting conventions, to see
    failure patterns beyond one website's style.
-4. A decision on the keying-mark ambiguity: is there a reliable geometric prior
+6. A decision on the keying-mark ambiguity: is there a reliable geometric prior
    (position relative to insert boundary, distinctive shape like a D-notch instead
    of a plain circle) that generalizes across sources?
-5. A real OCR/AI-vision reader wired into `LabelReader` and measured for character
+7. A real OCR/AI-vision reader wired into `LabelReader` and measured for character
    accuracy on actual connector-diagram fonts -- this cannot be assessed on synthetic
    `putText` labels.
